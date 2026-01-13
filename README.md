@@ -1,4 +1,4 @@
-# # 🧬 MedDetFake  
+# # 🧬 MedFakeDet 
 ### **MedFakeDet: Multi-Organ Medical Deepfake Detection and Inpainting Localization System via Effective Deep Learning Models and Density Maps**
 
 **Authors:**  
@@ -47,6 +47,8 @@ project_root/
 │    └── index.html
 │
 ├── static/
+├── data/
+  └── dataset_links.txt
 ├── models/
   ├── Deep_Fake_Synthesis_Detection_Model.ipynb
   ├── Unet_Based_Manipulation_Localization.ipynb
@@ -104,6 +106,26 @@ models/
 ```
 
 [From this link:](https://drive.google.com/drive/folders/13EO07JTrHvH9Cy8GcDb8xsE55bN300yF)
+
+---
+---
+
+## 🔁 Reproducibility and Re-training Support
+
+In addition to pretrained model weights, this repository includes **Jupyter Notebook files (`.ipynb`) under the `models/` directory** that provide the **full training pipelines** for both synthesis detection and manipulation localization tasks. These notebooks are intentionally shared to support **reproducibility, transparency, and extensibility** of the proposed methods.
+
+Specifically:
+
+- **`Deep_Fake_Synthesis_Detection_Model.ipynb`** contains the complete training and evaluation pipeline for the **8-class ResNet-based synthesis deepfake detection model**, including dataset preparation, backbone configuration, and performance evaluation.
+- **`Unet_Based_Manipulation_Localization.ipynb`** provides the end-to-end implementation for **U-Net-based density map generation and manipulation localization**, including loss design, threshold-based ablation analysis, and bounding box extraction from density maps.
+
+By providing both pretrained models and training notebooks, **MedFakeDet** allows researchers and practitioners to:
+
+- retrain the models on new or MedFake and MedFakeInpaint datasets,
+- reproduce the reported experimental results,
+- perform further ablation studies or architectural modifications.
+
+This design choice strengthens the **reproducible software contribution** aspect of the study and aligns with best practices for research-oriented software dissemination.
 
 ---
 
