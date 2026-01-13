@@ -48,7 +48,7 @@ project_root/
 │
 ├── static/
 ├── data/
-  └── dataset_links.txt
+  └── dataset_drive_links.txt
 ├── models/
   ├── Deep_Fake_Synthesis_Detection_Model.ipynb
   ├── Unet_Based_Manipulation_Localization.ipynb
