@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MedDetFake Detection UI</title>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 40px;
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #0f1115, #1a1d23);
+      color: #e6e6e6;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 34px;
+      font-weight: 600;
+      color: #ffffff;
+      text-shadow: 0 0 12px rgba(0, 0, 0, 0.6);
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .card {
+      background: rgba(28, 30, 35, 0.8);
+      backdrop-filter: blur(12px);
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
+      width: 460px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .card h3 {
+      margin: 18px 0 10px;
+      color: #b9c4d0;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    input[type="file"], input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(15, 17, 22, 0.75);
+      color: #d5d9df;
+      margin-bottom: 12px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    input[type="file"]::file-selector-button {
+      padding: 8px 12px;
+      background: #007bff;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+    }
+
+    input[type="file"]::file-selector-button:hover {
+      background: #005fcc;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+    }
+    .row > div {
+      flex: 1;
+    }
+
+    #selectCanvas {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #006aff, #0053c7);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      margin-top: 10px;
+      transition: 0.25s;
+      box-shadow: 0 4px 14px rgba(0, 102, 255, 0.25);
+    }
+
+    .btn:hover {
+      background: linear-gradient(135deg, #0057d1, #003e94);
+    }
+
+    #resultBox {
+      background: rgba(255,255,255,0.06);
+      padding: 14px;
+      border-radius: 10px;
+      margin-top: 15px;
+      font-size: 13px;
+      color: #cdd3db;
+      white-space: pre-wrap;
+      line-height: 1.35;
+    }
+
+    .outGrid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .outImg {
+      width: 100%;
+      border-radius: 12px;
+      margin-top: 8px;
+      border: 2px solid rgba(255,255,255,0.1);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      background: rgba(0,0,0,0.15);
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      margin-right: 8px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.06);
+      color: #dfe6ee;
+    }
+
+    /* LOADING OVERLAY */
+    #loadingOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(10, 12, 17, 0.85);
+      backdrop-filter: blur(6px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 9999;
+      color: #e2e6eb;
+    }
+
+    .loader {
+      border: 6px solid rgba(255,255,255,0.1);
+      border-top: 6px solid #4da3ff;
+      border-radius: 50%;
+      width: 70px;
+      height: 70px;
+      animation: spin 1.1s linear infinite;
+      margin-bottom: 15px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .smallNote {
+      opacity: 0.75;
+      font-size: 12px;
+      margin-top: 6px;
+    }
+  </style>
+</head>
+
+<body>
+<h1>MedDetFake Detection Tool</h1>
+
+<!-- LOADING OVERLAY -->
+<div id="loadingOverlay">
+  <div class="loader"></div>
+  <p>Processing...</p>
+</div>
+
+<div class="container">
+
+  <!-- LEFT -->
+  <div class="card">
+    <h3>API Settings</h3>
+    <input id="apiUrl" type="text" value="http://localhost:8000">
+
+    <h3>Model Paths</h3>
+    <input id="manipModelPath" type="text" value="./models/density_region_detector.pth">
+    <input id="synthModelPath" type="text" value="./models/resnet_8class_best.pth">
+
+    <h3>Select Image</h3>
+    <input type="file" id="imageInput" accept="image/*">
+    <canvas id="selectCanvas"></canvas>
+    <div class="smallNote">
+      Note: Manipulation detection does not need a user-drawn box. The model predicts manipulated regions automatically.
+    </div>
+
+    <h3>Manipulation Detection Settings</h3>
+    <div class="row">
+      <div>
+        <input id="thr" type="number" step="0.01" value="0.28" min="0" max="1" />
+        <div class="smallNote">Threshold (thr)</div>
+      </div>
+      <div>
+        <input id="minArea" type="number" step="1" value="20" min="1" />
+        <div class="smallNote">Min area (pixels)</div>
+      </div>
+    </div>
+
+    <button class="btn" onclick="runManipulationDetection()">Run Manipulation Detection</button>
+    <button class="btn" onclick="runSynthesisDetection()">Run Synthesis Detection (8-Class)</button>
+
+    <div id="resultBox">No operation performed yet.</div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="card">
+    <h3>Outputs</h3>
+
+    <div class="outGrid">
+      <div>
+        <div class="tag">Annotated Boxes</div>
+        <img id="annotatedImage" class="outImg" src="">
+      </div>
+
+      <div>
+        <div class="tag">Density Map (Heatmap)</div>
+        <img id="densityImage" class="outImg" src="">
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  const imgInput = document.getElementById("imageInput");
+  const canvas = document.getElementById("selectCanvas");
+  const ctx = canvas.getContext("2d");
+  let img = new Image();
+
+  imgInput.addEventListener("change", function () {
+    const file = this.files[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    img.src = url;
+
+    img.onload = function () {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+    };
+  });
+
+  function showLoading(show) {
+    document.getElementById("loadingOverlay").style.display = show ? "flex" : "none";
+  }
+
+  function prettyManipResult(json) {
+    const lines = [];
+    lines.push(`[Manipulation Detection]`);
+    lines.push(`- is_manipulated: ${json.is_manipulated}`);
+    lines.push(`- count: ${json.count}`);
+    lines.push(`- threshold: ${json.threshold}`);
+    lines.push(`- min_area: ${json.min_area}`);
+    lines.push(`- device: ${json.device}`);
+    lines.push(``);
+    lines.push(json.message_en || "");
+    lines.push(``);
+    lines.push(`boxes_xyxy:`);
+    if (json.boxes_xyxy && json.boxes_xyxy.length) {
+      json.boxes_xyxy.forEach((b, i) => {
+        lines.push(`  ${i+1}) [${b.join(", ")}]`);
+      });
+    } else {
+      lines.push(`  (none)`);
+    }
+    return lines.join("\n");
+  }
+
+  async function runManipulationDetection() {
+    const api = document.getElementById("apiUrl").value.trim();
+    const file = imgInput.files[0];
+    if (!file) return alert("Please select an image.");
+
+    showLoading(true);
+
+    const thr = document.getElementById("thr").value;
+    const minArea = document.getElementById("minArea").value;
+    const modelPath = document.getElementById("manipModelPath").value;
+
+    let form = new FormData();
+    form.append("model_path", modelPath);
+    form.append("thr", thr);
+    form.append("min_area", minArea);
+    form.append("image", file);
+
+    try {
+      const res = await fetch(api + "/detect/manipulation_density", {
+        method: "POST",
+        body: form
+      });
+
+      const json = await res.json();
+      showLoading(false);
+
+      document.getElementById("resultBox").innerText = JSON.stringify(json, null, 2);
+
+      if (json.status === "ok") {
+        // show prettier summary
+        document.getElementById("resultBox").innerText = prettyManipResult(json);
+
+        // update images
+        if (json.annotated_boxes_image_url) {
+          document.getElementById("annotatedImage").src =
+            api + json.annotated_boxes_image_url + "?v=" + Date.now();
+        }
+        if (json.density_map_image_url) {
+          document.getElementById("densityImage").src =
+            api + json.density_map_image_url + "?v=" + Date.now();
+        }
+      }
+    } catch (e) {
+      showLoading(false);
+      document.getElementById("resultBox").innerText = "Error: " + e;
+    }
+  }
+
+  async function runSynthesisDetection() {
+    const api = document.getElementById("apiUrl").value.trim();
+    const file = imgInput.files[0];
+    if (!file) return alert("Please select an image.");
+
+    showLoading(true);
+
+    const modelPath = document.getElementById("synthModelPath").value;
+    let form = new FormData();
+    form.append("model_path", modelPath);
+    form.append("image", file);
+
+    try {
+      const res = await fetch(api + "/detect/synthesis8", {
+        method: "POST",
+        body: form
+      });
+
+      const json = await res.json();
+      showLoading(false);
+
+      const lines = [];
+      lines.push("[Synthesis Detection (8-Class)]");
+      lines.push(JSON.stringify(json, null, 2));
+      document.getElementById("resultBox").innerText = lines.join("\n");
+    } catch (e) {
+      showLoading(false);
+      document.getElementById("resultBox").innerText = "Error: " + e;
+    }
+  }
+</script>
+
+</body>
+</html>
